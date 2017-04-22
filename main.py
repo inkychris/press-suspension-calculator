@@ -1,27 +1,20 @@
 import math
-
-class Spring:
-    constant = 1630
-    free_length = 0.135
-
-    def force(self, compression):
-        return self.constant * compression
-
+import physics
 
 class System:
-    # Diagram Dimensions (metres)
+    # Diagram Dimensions (m)
     ac = 0.25
     ad = 0.5
     ab = 0.08
     ec = 0.06
 
-    spring = Spring()
+    spring = physics.Spring()
 
     # Load at point D (kg)
     load = 0.5
 
     def bc(self, spring_compression):
-        return self.ec + self.spring.free_length - spring_compression
+        return self.ec + self.spring.length(spring_compression)
 
     def cos_a(self, spring_compression):
         return (pow(self.ab, 2) + pow(self.ac, 2) - pow(self.bc(spring_compression), 2))/(2 * self.ab * self.ac)
@@ -43,3 +36,7 @@ press = System()
 x = 0.005
 print("Angle: {angle}".format(angle=press.angle(x)))
 print("BC: {bc}".format(bc=press.bc(x)))
+
+spring = Spring()
+print(spring.force(0.001))
+print(spring.force_at_length(0.0388))
