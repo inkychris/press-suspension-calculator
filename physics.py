@@ -1,3 +1,5 @@
+import unittest
+
 class Spring:
     # Spring constant (Nm^-1)
     constant = 1630
@@ -24,8 +26,31 @@ class Spring:
 
     # Returns the force for a given compression distance
     def force(self, compression):
-        return self.constant * (self.free_length - self.length(compression))
+        return round(self.constant * (self.free_length - self.length(compression)), 12)
 
     # Returns the force of the spring at a given length
     def force_at_length(self, length):
         return self.force(self.free_length - length)
+
+
+class TestSpring(unittest.TestCase):
+    def setUp(self):
+        self.spring = Spring()
+        self.spring.constant = 1000
+        self.spring.free_length = 0.1
+        self.spring.minimum_length = 0.01
+
+    def test_length(self):
+        self.assertEqual(self.spring.length(0.05), 0.05)
+        with self.assertRaises(AttributeError):
+            self.spring.length(0.095)
+
+    def test_force(self):
+        self.assertEqual(self.spring.force(0.01), 10)
+
+    def test_force_at_length(self):
+        self.assertEqual(self.spring.force_at_length(0.09), 10)
+
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
