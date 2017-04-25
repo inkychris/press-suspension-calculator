@@ -2,7 +2,7 @@ import unittest
 
 class Spring:
     # Spring constant (Nm^-1)
-    constant = 1630
+    constant = 3000
 
     # Length of spring without load (m)
     free_length = 0.135
