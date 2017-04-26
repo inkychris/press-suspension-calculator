@@ -1,59 +1,79 @@
-import math
 import physics
+import plotly
+import plotly.graph_objs as go
 
-class System:
-    # Diagram Dimensions (m)
-    ab = 0.10
-    ac = 0.25
-    cd = 0.25
+press = physics.System()
+press.spring.constant = 3190
+press.spring.free_length = 0.098
+press.spring.minimum_length = 0.0359
 
-    # Angle of system arm without load
-    CAB = 35
+press_ab = 0.02
+press_ab_max = 0.2
+press_ab_inc = 0.001
 
-    spring = physics.Spring()
+x = []
+y_compression = []
+y_spring_force = []
+y_spring_force_maximum = []
+y_press_bc = []
+y_press_ec = []
+y_press_be_minimum = []
 
-    # Load at point D (kg)
-    load = 0.5
+while press_ab <= press_ab_max:
+    press.ab = press_ab
+    compression = press.spring_compression()
+    press_be_minimum = press.be_minimum()
+    try:
+        max_spring_force = press.spring.force_at_length(press_be_minimum)
+    except AttributeError:
+        max_spring_force = 0
 
-    def CAB_rads(self):
-        return math.radians(self.CAB)
+    x.append(press_ab)
+    y_compression.append(compression * 1e+3)
+    y_spring_force.append(press.spring.force(compression))
+    y_press_bc.append(press.bc() * 1e+3)
+    y_press_ec.append(press.ec() * 1e+3)
+    y_press_be_minimum.append(press_be_minimum * 1e+3)
+    y_spring_force_maximum.append(max_spring_force)
 
-    def af(self):
-        return self.ac * math.cos(self.CAB_rads())
-
-    def bc(self):
-        return math.sqrt( (self.ab ** 2) + (self.ac ** 2) - (2 * self.ab * self.ac * math.cos(self.CAB_rads())) )
-
-    def cos_ACB(self):
-        return ( (self.ac ** 2) + (self.bc() ** 2) - (self.ab ** 2) ) / ( 2 * self.bc() * self.ac )
-
-    def sin_ACB(self):
-        return math.sqrt( 1 - (self.cos_ACB() ** 2) )
-
-    def load_moment(self):
-        return self.load * 9.81 * math.cos( self.CAB_rads() ) * (self.ac + self.cd)
-
-    def suspension_moment(self, spring_compression):
-        return self.spring.force(spring_compression) * self.sin_ACB()
-
-    def ec(self, spring_compression):
-        return self.bc() - self.spring.length(spring_compression)
-
-    def spring_compression(self):
-        minimum_compression = 0
-        maximum_compression = self.spring.free_length - self.spring.minimum_length
-
-        while not math.isclose(minimum_compression, maximum_compression, rel_tol=1e-12):
-            compression = ( maximum_compression + minimum_compression ) / 2
-            moment = self.load_moment() - self.suspension_moment(compression)
-
-            if moment < 0:
-                maximum_compression = compression
-            elif moment > 0:
-                minimum_compression = compression
-
-        return round(minimum_compression, 12)
+    press_ab = round(press_ab + press_ab_inc, 12)
 
 
-test = System()
-print(test.ec(test.spring_compression()))
+trace_compression = go.Trace(
+    x = x,
+    y = y_compression,
+    name = "Spring Compression Rest (mm)"
+)
+
+trace_spring_force = go.Trace(
+    x = x,
+    y = y_spring_force,
+    name = "Spring Force Rest (N)"
+)
+
+trace_press_bc = go.Trace(
+    x = x,
+    y = y_press_bc,
+    name = "bc Rest (mm)"
+)
+
+trace_press_ec = go.Trace(
+    x = x,
+    y = y_press_ec,
+    name = "ec (mm)"
+)
+
+trace_press_be_minimum = go.Trace(
+    x = x,
+    y = y_press_be_minimum,
+    name = "Spring Length Min (mm)"
+)
+
+trace_spring_force_maximum = go.Trace(
+    x = x,
+    y = y_spring_force_maximum,
+    name = "Spring Force Max (N)"
+)
+
+data = [trace_compression, trace_spring_force, trace_press_bc, trace_press_ec, trace_press_be_minimum, trace_spring_force_maximum]
+plotly.offline.plot(data)
