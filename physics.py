@@ -3,13 +3,13 @@ import unittest
 
 class Spring:
     # Spring constant (Nm^-1)
-    constant = 1630
+    constant = 1000
 
     # Length of spring without load (m)
-    free_length = 0.135
+    free_length = 0.1
 
     # Specified minimum length (m)
-    minimum_length = 0.0388
+    minimum_length = 0.01
 
     # Returns length of spring after given compression
     def length(self, compression):
@@ -60,21 +60,21 @@ class System:
     cd = 0.25
 
     # Angle of system arm without load
-    CAB = 35
+    rest_angle = 45
 
     spring = Spring()
 
     # Load at point D (kg)
-    load = 0.5
+    load = 1
 
-    def CAB_rads(self):
-        return math.radians(self.CAB)
+    def rest_angle_rads(self):
+        return math.radians(self.rest_angle)
 
     def af(self):
-        return self.ac * math.cos(self.CAB_rads())
+        return self.ac * math.cos(self.rest_angle_rads())
 
     def bc(self):
-        return math.sqrt( (self.ab ** 2) + (self.ac ** 2) - (2 * self.ab * self.ac * math.cos(self.CAB_rads())) )
+        return math.sqrt( (self.ab ** 2) + (self.ac ** 2) - (2 * self.ab * self.ac * math.cos(self.rest_angle_rads())) )
 
     def cos_ACB(self):
         return ( (self.ac ** 2) + (self.bc() ** 2) - (self.ab ** 2) ) / ( 2 * self.bc() * self.ac )
@@ -83,7 +83,7 @@ class System:
         return math.sqrt( 1 - (self.cos_ACB() ** 2) )
 
     def load_moment(self):
-        return self.load * 9.81 * math.cos( self.CAB_rads() ) * (self.ac + self.cd)
+        return self.load * 9.81 * math.cos( self.rest_angle_rads() ) * (self.ac + self.cd)
 
     def suspension_moment(self, spring_compression):
         return self.spring.force(spring_compression) * self.sin_ACB()
