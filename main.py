@@ -3,12 +3,14 @@ import plotly
 import plotly.graph_objs as go
 
 press = physics.System()
-press.spring.constant = 3190
-press.spring.free_length = 0.098
-press.spring.minimum_length = 0.0359
+press.rest_angle = 30
 
-press_ab = 0.02
-press_ab_max = 0.2
+press.spring.constant = 1630
+press.spring.free_length = 0.135
+press.spring.minimum_length = 0.0388
+
+press_ab_min = 0.02
+press_ab_max = 0.15
 press_ab_inc = 0.001
 
 x = []
@@ -19,8 +21,8 @@ y_press_bc = []
 y_press_ec = []
 y_press_be_minimum = []
 
-while press_ab <= press_ab_max:
-    press.ab = press_ab
+while press_ab_min <= press_ab_max:
+    press.ab = press_ab_min
     compression = press.spring_compression()
     press_be_minimum = press.be_minimum()
     try:
@@ -28,7 +30,7 @@ while press_ab <= press_ab_max:
     except AttributeError:
         max_spring_force = 0
 
-    x.append(press_ab)
+    x.append(press_ab_min)
     y_compression.append(compression * 1e+3)
     y_spring_force.append(press.spring.force(compression))
     y_press_bc.append(press.bc() * 1e+3)
@@ -36,7 +38,7 @@ while press_ab <= press_ab_max:
     y_press_be_minimum.append(press_be_minimum * 1e+3)
     y_spring_force_maximum.append(max_spring_force)
 
-    press_ab = round(press_ab + press_ab_inc, 12)
+    press_ab_min = round(press_ab_min + press_ab_inc, 12)
 
 
 trace_compression = go.Trace(
@@ -77,6 +79,6 @@ trace_spring_force_maximum = go.Trace(
 
 data = [trace_compression, trace_spring_force, trace_press_bc, trace_press_ec, trace_press_be_minimum, trace_spring_force_maximum]
 
-figure = {"data" : data, "layout" : {"title": "Screen Press System Analysis - Rest angle: {}".format(press.CAB)}}
+figure = {"data" : data, "layout" : {"title": "Screen Press System Analysis - Rest angle: {}".format(press.rest_angle)}}
 
-plotly.offline.plot(figure, filename="{Sk}Nm-1_{ang}deg-rest-angle.html".format(Sk=press.spring.constant, ang=press.CAB))
+plotly.offline.plot(figure, filename="{Sk}Nm-1_{ang}deg-rest-angle.html".format(Sk=press.spring.constant, ang=press.rest_angle))
