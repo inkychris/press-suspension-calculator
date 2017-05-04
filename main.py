@@ -76,4 +76,7 @@ trace_spring_force_maximum = go.Trace(
 )
 
 data = [trace_compression, trace_spring_force, trace_press_bc, trace_press_ec, trace_press_be_minimum, trace_spring_force_maximum]
-plotly.offline.plot(data)
+
+figure = {"data" : data, "layout" : {"title": "Screen Press System Analysis - Rest angle: {}".format(press.CAB)}}
+
+plotly.offline.plot(figure, filename="{Sk}Nm-1_{ang}deg-rest-angle.html".format(Sk=press.spring.constant, ang=press.CAB))
